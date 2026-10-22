@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-*/
+*.log
+.DS_Store
+.env
+.env.*
+
+# Local only: dev log and any real plan files
+docs/
+/travel-plan*.json
+**/travel-plan*.json
