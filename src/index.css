@@ -26,7 +26,8 @@
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4); --shadow-pop: 0 16px 40px -12px rgba(0, 0, 0, 0.7);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body, #root { height: 100%; }
+html { background: var(--color-canvas); }
+html, body, #root { height: 100%; min-height: 100dvh; }
 body { margin: 0; font-family: var(--font-sans); font-size: var(--text-ph-body); line-height: 1.5; color: var(--color-text); background: var(--color-canvas); -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
 :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
@@ -35,14 +36,14 @@ h1 { font-size: var(--text-2xl); letter-spacing: -0.01em; line-height: 1.15; }
 .ic { flex: none; vertical-align: middle; display: inline-block; }
 
 /* shell */
-.app { height: 100dvh; display: flex; flex-direction: column; max-width: 520px; margin: 0 auto; position: relative; background: var(--color-canvas); overflow-x: hidden; }
+.app { position: fixed; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: auto; display: flex; flex-direction: column; max-width: 520px; margin: 0 auto; background: var(--color-canvas); overflow-x: hidden; }
 .main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); position: relative; }
 .hd { flex: none; }
 .scr { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; scroll-behavior: smooth; position: relative; }
 .scr::-webkit-scrollbar { display: none; }
 .inner { padding: 0 var(--ph-px) 28px; }
 .tabbar { flex: none; height: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); padding-top: 4px; background: var(--color-header-bg); border-top: 1px solid var(--color-border); display: grid; grid-template-columns: repeat(3, 1fr); z-index: 6; }
-.tab { height: var(--tabbar-h); min-height: var(--tap-min); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; color: var(--color-header-muted); font-size: var(--text-2xs); font-weight: 600; }
+.tab { height: calc(var(--tabbar-h) - 4px); min-height: var(--tap-min); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; color: var(--color-header-muted); font-size: var(--text-2xs); font-weight: 600; }
 .tab .pill { display: flex; align-items: center; justify-content: center; width: 56px; height: 30px; border-radius: 15px; }
 .tab.on { color: var(--color-primary-text); }
 .tab.on .pill { background: var(--color-primary-soft); }
