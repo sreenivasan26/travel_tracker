@@ -2,7 +2,7 @@ import React from 'react'
 import {
   Plane, CalendarClock, Play, Check, Ban, Train, Bus, Car, BedDouble, Ticket, MapPin, Ellipsis, Briefcase, User, Copy, Eye,
 } from 'lucide-react'
-import { fmtTime, fmtMoney, stayUntil, fmtShort } from './lib/travel.js'
+import { fmtTime, fmtMoney, stayUntil, fmtShort, routeText, timesText, nextTravelText } from './lib/travel.js'
 
 export const STATUS = {
   upcoming: { cls: 's-up', label: 'Upcoming', Icon: CalendarClock },
@@ -11,7 +11,7 @@ export const STATUS = {
   cancelled: { cls: 's-can', label: 'Cancelled', Icon: Ban },
 }
 export const KIND_ICON = { flight: Plane, train: Train, bus: Bus, cab: Car, car: Car, stay: BedDouble, activity: Ticket, place: MapPin, other: Ellipsis }
-export const KIND_LABEL = { flight: 'Flight', train: 'Train', bus: 'Bus', cab: 'Cab', car: 'Cab', stay: 'Stay', activity: 'Activity', place: 'Place', other: 'Other' }
+export const KIND_LABEL = { flight: 'Flight', train: 'Train', bus: 'Bus', cab: 'Cab', car: 'Car (own)', stay: 'Stay', activity: 'Activity', place: 'Place', other: 'Other' }
 
 export function StatusChip({ status }) {
   const s = STATUS[status]
@@ -69,7 +69,8 @@ export function Ref({ code, onCopied }) {
 export function ItemRow({ item, last, onCopied, showTick = true }) {
   const until = stayUntil(item)
   const parts = []
-  if (item.time != null) parts.push(<span key="t" className="t">{fmtTime(item.time)}</span>)
+  const route = routeText(item), tline = timesText(item), nxt = nextTravelText(item)
+  if (item.time != null && !tline) parts.push(<span key="t" className="t">{fmtTime(item.time)}</span>)
   const where = [item.place, until ? `until ${fmtShort(until)}` : ''].filter(Boolean).join(' · ')
   return (
     <div className={`it${last ? ' last' : ''}`}>
@@ -78,6 +79,9 @@ export function ItemRow({ item, last, onCopied, showTick = true }) {
       <div className="tx">
         <b>{item.title}</b>
         {(parts.length > 0 || where) && <small>{parts}{parts.length > 0 && where ? ' · ' : ''}{where}</small>}
+        {route && <small className="route">{route}</small>}
+        {tline && <small><span className="t">{tline}</span></small>}
+        {nxt && <small className="nxt">{nxt}</small>}
         {item.booking_ref && <Ref code={item.booking_ref} onCopied={onCopied} />}
       </div>
       <span className="cost">{item.cost != null && item.cost > 0 ? fmtMoney(item.cost) : ''}</span>

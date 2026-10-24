@@ -112,6 +112,7 @@ h1 { font-size: var(--text-2xl); letter-spacing: -0.01em; line-height: 1.15; }
 .tx { min-width: 0; }
 .tx b { display: block; font-weight: 600; font-size: var(--text-base); line-height: 1.3; overflow-wrap: anywhere; }
 .tx small { display: block; color: var(--color-text-muted); font-size: var(--text-sm); line-height: 1.35; margin-top: 1px; overflow-wrap: anywhere; }
+.tx small.route { color: var(--color-text); }
 .tx small .t { color: var(--color-text); font-weight: 600; font-variant-numeric: tabular-nums; }
 .cost { font-variant-numeric: tabular-nums; font-size: var(--text-sm); padding-top: 2px; white-space: nowrap; }
 .ref { display: flex; width: max-content; max-width: 100%; align-items: center; min-height: var(--tap-min); margin: -4px 0 -12px -8px; padding: 0 8px; }

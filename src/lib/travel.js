@@ -56,6 +56,28 @@ export function fmtTime(min) {
   const p = (n) => String(n).padStart(2, '0')
   return `${p(Math.floor(min / 60) % 24)}:${p(min % 60)}`
 }
+export const TRANSPORT_KINDS = ['flight', 'train', 'bus', 'cab', 'car']
+export const isTransport = (kind) => TRANSPORT_KINDS.includes(kind)
+export function fmtDuration(mins) { // 190 -> "3h 10m", 45 -> "45m", 120 -> "2h"
+  if (mins == null || !Number.isFinite(mins) || mins < 0) return ''
+  const h = Math.floor(mins / 60), m = Math.round(mins % 60)
+  return [h ? `${h}h` : '', m || !h ? `${m}m` : ''].filter(Boolean).join(' ')
+}
+// "Chennai → Pondy" for transport rows (either end may be missing).
+export function routeText(item) {
+  if (!isTransport(item.kind)) return ''
+  const a = item.from_place || '', b = item.to_place || ''
+  return a && b ? `${a} → ${b}` : a || b
+}
+// "09:00 → 12:10 · 3h 10m" (parts that exist only); transport rows only.
+export function timesText(item) {
+  if (!isTransport(item.kind)) return ''
+  const t = item.time != null ? fmtTime(item.time) : ''
+  const e = item.end_time != null ? fmtTime(item.end_time) : ''
+  const span = t && e ? `${t} → ${e}` : t ? `Departs ${t}` : e ? `Arrives ${e}` : ''
+  return [span, fmtDuration(item.duration_mins)].filter(Boolean).join(' · ')
+}
+export const nextTravelText = (item) => (item.travel_to_next_mins != null ? `${item.travel_to_next_mins} min to next` : '')
 export function fmtStamp(ms) { // "Thu 22 Oct, 09:14" in the phone's local time
   const d = new Date(ms)
   const p = (n) => String(n).padStart(2, '0')
@@ -128,6 +150,9 @@ export function validatePlan(text, { fileName = 'That file', currentGeneratedAt 
         id: String(it.id ?? `${t.id}-${j}`), kind: typeof it.kind === 'string' ? it.kind : 'other', title: it.title,
         place: it.place || '', date: it.date || null, time: isNum(it.time) ? it.time : null, end_date: it.end_date || null,
         booking_ref: it.booking_ref || '', cost: isNum(it.cost) ? it.cost : null, done: it.done === true, sort_order: numOr(it.sort_order, j),
+        from_place: typeof it.from_place === 'string' ? it.from_place.trim() : '', to_place: typeof it.to_place === 'string' ? it.to_place.trim() : '',
+        end_time: isNum(it.end_time) ? it.end_time : null, duration_mins: isNum(it.duration_mins) ? it.duration_mins : null,
+        travel_to_next_mins: isNum(it.travel_to_next_mins) ? it.travel_to_next_mins : null,
       })
     }
     const spend = (t.spend || []).filter((s) => s && typeof s === 'object').map((s) => ({

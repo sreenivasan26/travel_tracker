@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import {
   validatePlan, tripStatus, groupTrips, pastByYear, isStale, ageLabel, yearRows, yearSummary, yearList, budgetFigures,
   groupItinerary, splitPlaces, dayProgress, startsInDays, nightsOf, fmtRange, fmtDay, fmtTime, fmtMoney, itemPct, nextItem, todaysItems,
-  STORAGE_KEY,
+  STORAGE_KEY, fmtDuration, routeText, timesText, nextTravelText, isTransport,
 } from './travel.js'
 import { applyPlanText, loadStored } from './store.js'
 
@@ -261,5 +261,45 @@ describe('formatting', () => {
     expect(fmtMoney(1234567)).toBe('₹12,34,567')
     expect(fmtMoney(-29650)).toBe('−₹29,650')
     expect(fmtMoney(7200, 2)).toBe('₹7,200.00')
+  })
+})
+
+describe('v3.4 addendum 8: car, route, travel time', () => {
+  const withItems = (items) => {
+    const o = raw()
+    o.trips[0].items = items
+    return validatePlan(JSON.stringify(o)).plan.trips.find((t) => t.id === o.trips[0].id).items
+  }
+  it('accepts kind car and keeps the new item fields', () => {
+    const o = raw()
+    o.trips[0].items = [{ id: 'c1', kind: 'car', title: 'Drive', date: o.trips[0].start_date, time: 540, end_time: 730, duration_mins: 190, from_place: ' Chennai ', to_place: 'Pondy', travel_to_next_mins: 25 }]
+    const r = validatePlan(JSON.stringify(o))
+    expect(r.ok).toBe(true)
+    const it = r.plan.trips.find((t) => t.id === o.trips[0].id).items[0]
+    expect(it).toMatchObject({ kind: 'car', from_place: 'Chennai', to_place: 'Pondy', end_time: 730, duration_mins: 190, travel_to_next_mins: 25 })
+    expect(isTransport('car')).toBe(true)
+  })
+  it('old items without the new fields load with empty defaults', () => {
+    const [it] = withItems([{ id: 'x', kind: 'flight', title: 'Fly', date: '2026-12-20' }])
+    expect(it).toMatchObject({ from_place: '', to_place: '', end_time: null, duration_mins: null, travel_to_next_mins: null })
+    expect(routeText(it)).toBe('')
+    expect(timesText(it)).toBe('')
+    expect(nextTravelText(it)).toBe('')
+  })
+  it('formats duration', () => {
+    expect(fmtDuration(190)).toBe('3h 10m')
+    expect(fmtDuration(120)).toBe('2h')
+    expect(fmtDuration(45)).toBe('45m')
+    expect(fmtDuration(null)).toBe('')
+  })
+  it('formats route, times and next-travel for transport only', () => {
+    const t = { kind: 'train', from_place: 'Chennai', to_place: 'Pondy', time: 540, end_time: 730, duration_mins: 190, travel_to_next_mins: 30 }
+    expect(routeText(t)).toBe('Chennai → Pondy')
+    expect(timesText(t)).toBe('09:00 → 12:10 · 3h 10m')
+    expect(nextTravelText(t)).toBe('30 min to next')
+    expect(routeText({ ...t, to_place: '' })).toBe('Chennai')
+    expect(routeText({ ...t, kind: 'place' })).toBe('')
+    expect(timesText({ ...t, kind: 'stay' })).toBe('')
+    expect(timesText({ kind: 'cab', time: 600 })).toBe('Departs 10:00')
   })
 })
